@@ -1,16 +1,16 @@
-import {Routes} from "react-router-dom";
-import {
-
-} from "../../pages";
-// import { getItem } from "../../utils";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { Dashboard } from "../../pages";
+import { getItem } from "../../utils";
 
 const AdminRoute = () => {
-    // const profile = getItem("profile");
-    // const isAuthenticated = !!profile;
+  const profile = getItem("profile");
+  const isAuthenticated = !!profile;
 
-    // if (!isAuthenticated) return <Navigate to="/" />;
+  if (!isAuthenticated) return <Navigate to="/" />;
   return (
     <Routes>
+      <Route path="/" element={<Navigate to={"dashboard"} replace />} />
+      <Route path="dashboard" element={<Dashboard />} />
       {/* <Route path="/" element={<Navigate to={"dashboard"} replace />} />
       <Route path="dashboard" element={<Dashboard />} />
       <Route path="barang" element={<BarangPages />} />
