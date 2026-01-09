@@ -58,6 +58,25 @@ API_JWT.interceptors.request.use(
 export const login = (data: AuthProps) => API_JWT.post("/auth/login", data);
 export const logout = () => API_JWT.delete("/auth/logout");
 
+//api archive
+export const fetchArchive = () => API_JWT.get("/archive");
+export const deleteArchive = async (uuid: string) => {
+  return await API_JWT.delete(`/archive/delete/${uuid}`);
+};
+export const fetchArchiveById = (uuid: string) => {
+  return API_JWT.get(`/archive/${uuid}`);
+};
+export const createArchive = (data: any) =>
+  API_JWT.post("/archive/create", data);
+export const importDataArchive = (data: {}) =>
+  API_JWT.post("/archive/import", data);
+
+// update archive
+export const updateArchive = (uuid: string, data: FormData) =>
+  API_JWT.put(`/archive/update/${uuid}`, data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
 //api barang
 export const fetchBarang = () => API_JWT.get("/barang");
 export const createBarang = (data: FormData) =>
@@ -82,3 +101,18 @@ export const getRiwayatPeminjaman = () => API_JWT.get("/peminjaman");
 export const riwayat = () => API_JWT.get("/peminjaman/riwayat");
 export const updateStatusPeminjaman = (uuid: string, status: string) =>
   API_JWT.put(`/peminjaman/update/${uuid}`, { status });
+
+// api borrowing
+export const fetchBorrowing = () => API_JWT.get("/borrowing");
+export const deleteBorrowing = async (uuid: string) => {
+  return await API_JWT.delete(`/borrowing/delete/${uuid}`);
+};
+export const fetchBorrowingById = (uuid: string) => {
+  return API_JWT.get(`/borrowing/${uuid}`);
+};
+export const createBorrowing = (data: any) =>
+  API_JWT.post("/borrowing/create", data);
+export const updateBorrowing = (uuid: string, data: any) =>
+  API_JWT.put(`/borrowing/update/${uuid}`, data);
+export const updateStatusBorrowing = (uuid: string, data: any) =>
+  API_JWT.put(`/borrowing/update-status/${uuid}`, data);

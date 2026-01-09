@@ -1,5 +1,15 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { Dashboard } from "../../pages";
+import {
+  Dashboard,
+  Archive,
+  Borrowing,
+  Riwayat,
+  ArchiveEdit,
+  ArchiveCreate,
+  ArchiveDetail,
+  BorrowingCreate,
+  BorrowingEdit,
+} from "../../pages";
 import { getItem } from "../../utils";
 
 const AdminRoute = () => {
@@ -11,15 +21,19 @@ const AdminRoute = () => {
     <Routes>
       <Route path="/" element={<Navigate to={"dashboard"} replace />} />
       <Route path="dashboard" element={<Dashboard />} />
-      {/* <Route path="/" element={<Navigate to={"dashboard"} replace />} />
-      <Route path="dashboard" element={<Dashboard />} />
-      <Route path="barang" element={<BarangPages />} />
-      <Route path="barang/create" element={<BarangCreate />} />
-      <Route path="barang/edit/:id" element={<BarangEdit />} />
-      <Route path="peminjaman" element={<PeminjamanBarang />} />
-      <Route path="peminjaman/create" element={<PeminjamanCreate />} />
+      <Route path="archive" element={<Archive />} />
+      <Route path="archive/detail/:id" element={<ArchiveDetail />} />
+      <Route path="archive/edit/:id" element={<ArchiveEdit />} />
+      <Route path="archive/create" element={<ArchiveCreate />} />
+      <Route path="borrowing" element={<Borrowing />} />
+      <Route path="borrowing/create" element={<BorrowingCreate />} />
+      <Route path="borrowing/edit/:uuid" element={<BorrowingEdit />} />
+      <Route path="peminjaman" element={<Borrowing />} />
       <Route path="riwayat" element={<Riwayat />} />
-      <Route path="change-password" element={<ChangePassword />} /> */}
+      <Route path="arsip" element={<Archive />} />
+      <Route path="arsip/detail/:id" element={<ArchiveDetail />} />
+      <Route path="arsip/edit/:id" element={<ArchiveEdit />} />
+      <Route path="arsip/create" element={<ArchiveCreate />} />
     </Routes>
   );
 };

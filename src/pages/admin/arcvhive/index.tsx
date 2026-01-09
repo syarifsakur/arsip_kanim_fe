@@ -1,10 +1,11 @@
 import React from 'react'
 import { AdminLayout } from '../../../layouts'
+import { ArchiveDefault } from '../../../components/archive'
 
 const Archive:React.FC = () => {
   return (
        <AdminLayout>
-      <div>Admin archive Content</div>
+        <ArchiveDefault></ArchiveDefault>
     </AdminLayout> 
   )
 }

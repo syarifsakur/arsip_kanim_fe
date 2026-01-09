@@ -19,7 +19,7 @@ import { logout } from "../../utils/apis";
 import logo from "../../assets/logo-imigrasi.png";
 import kantor from "../../assets/logo-imigrasi.png";
 
-const { Header, Sider, Content } = Layout;
+const { Header, Sider, Content, Footer } = Layout;
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -240,9 +240,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             overflow: "auto",
             margin: "24px 16px",
             padding: 24,
-            backgroundImage: `url(${kantor})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center 10px",
+            // backgroundImage: `url(${kantor})`,
+            // backgroundSize: "cover",
+            // backgroundPosition: "center 10px",
             borderRadius: borderRadiusLG,
             position: "relative",
           }}
@@ -261,6 +261,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             <div style={{ marginTop: 16 }}>{children}</div>
           </div>
         </Content>
+        <Footer style={{ textAlign: "center", padding: "12px 16px" }}>
+          {" "}
+          Sistem Inventaris &copy; 2024 Imigrasi Kelas I TPI Palu
+        </Footer>
       </Layout>
     </Layout>
   );
