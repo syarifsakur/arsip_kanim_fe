@@ -1,5 +1,14 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { Table, Button, Grid, Space, Input, Upload, Select } from "antd";
+import {
+  Table,
+  Button,
+  Grid,
+  Space,
+  Input,
+  Upload,
+  Select,
+  Popconfirm,
+} from "antd";
 import type { UploadProps } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +19,7 @@ import {
   deleteArchive,
   fetchArchive,
   importDataArchive,
+  updateArchiveStatus,
 } from "../../../utils/apis";
 
 const { useBreakpoint } = Grid;
@@ -19,22 +29,40 @@ const ArchiveDefault: React.FC = () => {
   const [filteredArchive, setFilteredArchive] = useState<ArchiveItem[]>([]);
   const [query, setQuery] = useState<string>("");
   const [year, setYear] = useState<string | undefined>(undefined);
+  const [applicationYear, setApplicationYear] = useState<string | undefined>(
+    undefined,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
   const navigate = useNavigate();
   const screens = useBreakpoint();
   const isMobile = useMemo(() => !screens.md, [screens]);
-  const yearOptions = useMemo(() => {
+
+  const birthYearOptions = useMemo(() => {
     const years = Array.from(
       new Set(
         archive
           .map((a) =>
-            a.date_of_birth ? String(a.date_of_birth).slice(0, 4) : ""
+            a.date_of_birth ? String(a.date_of_birth).slice(0, 4) : "",
           )
-          .filter((y) => y && /^\d{4}$/.test(y))
-      )
+          .filter((y) => y && /^\d{4}$/.test(y)),
+      ),
+    ).sort((a, b) => Number(b) - Number(a));
+    return years.map((y) => ({ label: y, value: y }));
+  }, [archive]);
+
+  const applicationYearOptions = useMemo(() => {
+    const years = Array.from(
+      new Set(
+        archive
+          .map((a) =>
+            a.application_date ? String(a.application_date).slice(0, 4) : "",
+          )
+          .filter((y) => y && /^\d{4}$/.test(y)),
+      ),
     ).sort((a, b) => Number(b) - Number(a));
     return years.map((y) => ({ label: y, value: y }));
   }, [archive]);
@@ -72,12 +100,12 @@ const ArchiveDefault: React.FC = () => {
       }));
 
       const cleaned = normalized.filter(
-        (item) => item.application_number !== "TOTAL DATA"
+        (item) => item.application_number !== "TOTAL DATA",
       );
 
       setArchive(cleaned);
 
-      // initial filter using query + year
+      // initial filter using query + year + applicationYear
       const q = query.toLowerCase();
       const filtered = cleaned.filter((item) => {
         const matchQuery = String(item.application_number || "")
@@ -86,7 +114,12 @@ const ArchiveDefault: React.FC = () => {
         const dob = item.date_of_birth || "";
         const dobYear = dob ? String(dob).slice(0, 4) : "";
         const matchYear = !year || dobYear === year;
-        return matchQuery && matchYear;
+
+        const appDate = item.application_date || "";
+        const appYear = appDate ? String(appDate).slice(0, 4) : "";
+        const matchAppYear = !applicationYear || appYear === applicationYear;
+
+        return matchQuery && matchYear && matchAppYear;
       });
       setFilteredArchive(filtered);
     } catch (error) {
@@ -95,7 +128,7 @@ const ArchiveDefault: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [query, year]);
+  }, [query, year, applicationYear]);
 
   // initial load
   useEffect(() => {
@@ -106,11 +139,11 @@ const ArchiveDefault: React.FC = () => {
   useEffect(() => {
     const nextSize = isMobile ? 5 : 10;
     setPagination((p) =>
-      p.pageSize === nextSize ? p : { ...p, pageSize: nextSize, current: 1 }
+      p.pageSize === nextSize ? p : { ...p, pageSize: nextSize, current: 1 },
     );
   }, [isMobile]);
 
-  // filter archive based on query + year
+  // filter archive based on query + year + applicationYear
   useEffect(() => {
     setPagination((p) => ({ ...p, current: 1 }));
 
@@ -122,10 +155,15 @@ const ArchiveDefault: React.FC = () => {
       const dob = item.date_of_birth || "";
       const dobYear = dob ? String(dob).slice(0, 4) : "";
       const matchYear = !year || dobYear === year;
-      return matchQuery && matchYear;
+
+      const appDate = item.application_date || "";
+      const appYear = appDate ? String(appDate).slice(0, 4) : "";
+      const matchAppYear = !applicationYear || appYear === applicationYear;
+
+      return matchQuery && matchYear && matchAppYear;
     });
     setFilteredArchive(filtered);
-  }, [query, year, archive]);
+  }, [query, year, applicationYear, archive]);
 
   const handleDelete = async (uuid: string) => {
     try {
@@ -137,6 +175,31 @@ const ArchiveDefault: React.FC = () => {
     } catch (error) {
       console.error(error);
       showNotificationError("Gagal menghapus data archive!");
+    }
+  };
+
+  const handleBulkInactive = async () => {
+    try {
+      setIsUpdatingStatus(true);
+
+      // Update all filtered archives to inactive
+      const updatePromises = filteredArchive.map((item) =>
+        updateArchiveStatus(item.uuid, "inactive"),
+      );
+
+      await Promise.all(updatePromises);
+
+      showNotification(
+        `Berhasil mengubah status ${filteredArchive.length} arsip menjadi tidak aktif!`,
+      );
+
+      // Refresh data
+      await loadArchive();
+    } catch (error) {
+      console.error(error);
+      showNotificationError("Gagal mengubah status arsip!");
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -170,6 +233,7 @@ const ArchiveDefault: React.FC = () => {
         // ✅ reset state biar data baru keliatan + balik ke page 1
         setQuery("");
         setYear(undefined);
+        setApplicationYear(undefined);
         setPagination((p) => ({ ...p, current: 1 }));
 
         // ✅ refresh data otomatis
@@ -189,7 +253,7 @@ const ArchiveDefault: React.FC = () => {
     <div className="p-4 sm:p-6 bg-white rounded-lg shadow">
       <Space
         direction={isMobile ? "vertical" : "horizontal"}
-        className="w-full mb-4"
+        className="w-full mb-6"
         size={isMobile ? "small" : "middle"}
         style={{ justifyContent: "space-between" }}
       >
@@ -207,22 +271,67 @@ const ArchiveDefault: React.FC = () => {
             value={year ?? ""}
             onChange={(v) => setYear((v as string) || undefined)}
             allowClear
-            placeholder="Pilih Tahun Lahir"
-            options={[{ label: "Semua Tahun", value: "" }, ...yearOptions]}
+            placeholder="Filter Tahun Lahir"
+            options={[
+              { label: "Semua Tahun Lahir", value: "" },
+              ...birthYearOptions,
+            ]}
             style={{
               minWidth: isMobile ? 180 : 180,
               width: isMobile ? "100%" : undefined,
             }}
           />
+          <Select
+            value={applicationYear ?? ""}
+            onChange={(v) => setApplicationYear((v as string) || undefined)}
+            allowClear
+            placeholder="Filter Tahun Pembuatan"
+            options={[
+              { label: "Semua Tahun Pembuatan", value: "" },
+              ...applicationYearOptions,
+            ]}
+            style={{
+              minWidth: isMobile ? 180 : 200,
+              width: isMobile ? "100%" : undefined,
+            }}
+          />
         </Space>
 
-        <Space direction={isMobile ? "vertical" : "horizontal"}>
+        <Space
+          direction={isMobile ? "vertical" : "horizontal"}
+          size={isMobile ? "small" : "middle"}
+          style={{ width: isMobile ? "100%" : "auto" }}
+        >
+          <Popconfirm
+            title="Nonaktifkan Semua Arsip yang Ditampilkan?"
+            description={`${filteredArchive.length} arsip akan diubah statusnya menjadi tidak aktif.`}
+            onConfirm={handleBulkInactive}
+            okText="Ya"
+            cancelText="Batal"
+            disabled={filteredArchive.length === 0}
+          >
+            <Button
+              danger
+              size="middle"
+              block={isMobile}
+              loading={isUpdatingStatus}
+              disabled={filteredArchive.length === 0}
+              style={{ minWidth: isMobile ? "100%" : 100 }}
+            >
+              Nonaktifkan
+            </Button>
+          </Popconfirm>
+
           <Button
             onClick={() => navigate("/admin/arsip/create")}
             type="primary"
-            size={isMobile ? "middle" : "large"}
+            size="middle"
             block={isMobile}
-            style={{ backgroundColor: "#1890ff", borderColor: "#1890ff" }}
+            style={{
+              minWidth: isMobile ? "100%" : 110,
+              backgroundColor: "#1890ff",
+              borderColor: "#1890ff",
+            }}
           >
             Tambah Data
           </Button>
@@ -231,8 +340,9 @@ const ArchiveDefault: React.FC = () => {
             <Button
               icon={<UploadOutlined />}
               loading={isImporting}
-              size={isMobile ? "middle" : "large"}
+              size="middle"
               block={isMobile}
+              style={{ minWidth: isMobile ? "100%" : 110 }}
             >
               Import File
             </Button>
@@ -240,7 +350,7 @@ const ArchiveDefault: React.FC = () => {
         </Space>
       </Space>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" style={{ marginTop: "10px" }}>
         <Table
           columns={archiveColumns({
             current: pagination.current,

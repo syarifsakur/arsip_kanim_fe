@@ -25,7 +25,12 @@ type BorrowingPayload = {
 
 interface BorrowingFormProps {
   initialValues?: Partial<BorrowingItem> | null;
-  archives?: Array<{ uuid: string; application_number: string }>;
+  archives?: Array<{
+    uuid: string;
+    application_number: string;
+    no_archive: string | null;
+    full_name: string | null;
+  }>;
   onSubmit: (data: BorrowingPayload) => void;
   mode: "create" | "edit";
   isLoading?: boolean;
@@ -97,14 +102,21 @@ const BorrowingForm: React.FC<BorrowingFormProps> = ({
             optionLabelProp="label"
             disabled={mode === "edit"}
             style={{ width: "100%" }}
+            showSearch
+            filterOption={(input, option) => {
+              const label = (option?.label as string) || "";
+              return label.toLowerCase().includes(input.toLowerCase());
+            }}
           >
             {archives.map((archive) => (
               <Select.Option
                 key={archive.uuid}
                 value={archive.uuid}
-                label={archive.application_number}
+                label={`${archive.no_archive || ""} - ${
+                  archive.full_name || ""
+                }`}
               >
-                {archive.application_number}
+                {archive.no_archive || ""} - {archive.full_name || ""}
               </Select.Option>
             ))}
           </Select>

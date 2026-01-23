@@ -6,17 +6,20 @@ import {
   MenuUnfoldOutlined,
   HomeOutlined,
   LogoutOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
-import { Button, Layout, Menu, theme, Breadcrumb, Modal } from "antd";
+import { Button, Layout, Menu, theme, Breadcrumb, Modal, Avatar } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   menuItems,
+  getMenuItemsByRole,
   removeItem,
   showNotification,
   showNotificationError,
+  getItem,
 } from "../../utils";
 import { logout } from "../../utils/apis";
-import logo from "../../assets/logo-imigrasi.png";
+import logo from "../../assets/logo-imigrasi-removebg-preview.png";
 import kantor from "../../assets/logo-imigrasi.png";
 
 const { Header, Sider, Content, Footer } = Layout;
@@ -28,6 +31,8 @@ interface AdminLayoutProps {
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [selectedKey, setSelectedKey] = useState<string>("1");
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [currentMenuItems, setCurrentMenuItems] = useState<any>(menuItems);
 
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -36,15 +41,29 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Auto select menu berdasarkan route
+  useEffect(() => {
+    const profile = getItem("profile");
+    setUserProfile(profile);
+
+    const role = profile?.data?.role;
+
+    const roleBasedMenus = getMenuItemsByRole(role);
+    console.log(
+      "Menu items for role '" + role + "':",
+      roleBasedMenus.flatMap((s: any) => s.items).map((i: any) => i.label),
+    );
+
+    setCurrentMenuItems(roleBasedMenus);
+  }, []);
+
   useEffect(() => {
     const currentPath = location.pathname;
-    const foundItem = menuItems
+    const foundItem = currentMenuItems
       .flatMap((section: any) => section.items)
       .find((item: any) => currentPath.startsWith(item.path));
 
     if (foundItem) setSelectedKey(foundItem.key);
-  }, [location.pathname]);
+  }, [location.pathname, currentMenuItems]);
 
   const handleMenuClick = (path: string, key: string) => {
     setSelectedKey(key);
@@ -78,7 +97,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       { title: <HomeOutlined />, href: "/admin" },
     ];
 
-    const foundItem = menuItems
+    const foundItem = currentMenuItems
       .flatMap((section: any) => section.items)
       .find((item: any) => currentPath.startsWith(item.path));
 
@@ -110,7 +129,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         style={{
           height: "100vh",
           overflow: "auto",
-          backgroundColor: "", // ORANGE
+          backgroundColor: "#0a1a2f",
         }}
       >
         {/* LOGO */}
@@ -156,7 +175,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             borderRight: "none",
           }}
         >
-          {menuItems.map((section: any) => (
+          {currentMenuItems.map((section: any) => (
             <React.Fragment key={section.title}>
               <Menu.ItemGroup
                 title={<span style={{ opacity: 0.9 }}>{section.title}</span>}
@@ -210,6 +229,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             height: 64,
             display: "flex",
             alignItems: "center",
+            justifyContent: "space-between",
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
             position: "sticky",
             top: 0,
@@ -232,6 +252,25 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               height: 48,
             }}
           />
+
+          {/* Debug info - Role & User */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              fontSize: 12,
+            }}
+          >
+            <span style={{ color: "#666" }}>
+              <strong>Role:</strong> {userProfile?.data?.role || "unknown"}
+            </span>
+            <span style={{ color: "#999" }}>|</span>
+            <span style={{ color: "#666" }}>
+              <strong>User:</strong>{" "}
+              {userProfile?.data?.name || userProfile?.data?.username || "N/A"}
+            </span>
+          </div>
         </Header>
 
         <Content

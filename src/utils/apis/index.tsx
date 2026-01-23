@@ -19,7 +19,7 @@ API_JWT.interceptors.request.use(
       if (isExpired) {
         try {
           const response = await axios.get(
-            "http://localhost:2021/auth/refresh-token"
+            "http://localhost:2021/auth/refresh-token",
           );
 
           const newToken = response.data.token;
@@ -51,7 +51,7 @@ API_JWT.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // api auth
@@ -76,6 +76,9 @@ export const updateArchive = (uuid: string, data: FormData) =>
   API_JWT.put(`/archive/update/${uuid}`, data, {
     headers: { "Content-Type": "multipart/form-data" },
   });
+
+export const updateArchiveStatus = (uuid: string, status: string) =>
+  API_JWT.put(`/archive/update-status/${uuid}`, { application_status: status });
 
 //api barang
 export const fetchBarang = () => API_JWT.get("/barang");
@@ -116,3 +119,16 @@ export const updateBorrowing = (uuid: string, data: any) =>
   API_JWT.put(`/borrowing/update/${uuid}`, data);
 export const updateStatusBorrowing = (uuid: string, data: any) =>
   API_JWT.put(`/borrowing/update-status/${uuid}`, data);
+export const getBorrowingUser = () => API_JWT.get("/borrowing/user");
+
+// api user
+export const fetchUsers = () => API_JWT.get("/user");
+export const createUser = (data: any) => API_JWT.post("/user/create", data);
+export const fetchUserById = (uuid: string) => API_JWT.get(`/user/${uuid}`);
+
+export const getUserById = (uuid: string) => fetchUserById(uuid);
+export const updateUser = (uuid: string, data: any) =>
+  API_JWT.put(`/user/update/${uuid}`, data);
+export const deleteUser = async (uuid: string) => {
+  return await API_JWT.delete(`/user/delete/${uuid}`);
+};

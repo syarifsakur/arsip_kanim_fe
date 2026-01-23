@@ -81,6 +81,8 @@ const ArchiveForm: React.FC<ArchiveFormProps> = ({
       province: initialValues.province,
       district_city: initialValues.district_city,
       sub_district: initialValues.sub_district,
+      location: initialValues.location,
+      citizenship: initialValues.citizenship,
       file: fileList,
     });
   }, [initialValues, form]);
@@ -101,12 +103,14 @@ const ArchiveForm: React.FC<ArchiveFormProps> = ({
     const ext = getExt(raw.name);
     if (!ALLOWED_EXT.includes(ext) || !ALLOWED_MIME.includes(raw.type)) {
       return Promise.reject(
-        new Error("Format file tidak didukung. Gunakan PDF / PNG / JPG / JPEG.")
+        new Error(
+          "Format file tidak didukung. Gunakan PDF / PNG / JPG / JPEG.",
+        ),
       );
     }
     if (raw.size > MAX_FILE_SIZE) {
       return Promise.reject(
-        new Error("Ukuran file terlalu besar (maks 30MB).")
+        new Error("Ukuran file terlalu besar (maks 30MB)."),
       );
     }
 
@@ -122,7 +126,7 @@ const ArchiveForm: React.FC<ArchiveFormProps> = ({
       "application_date",
       values.application_date
         ? dayjs(values.application_date).format("YYYY-MM-DD")
-        : ""
+        : "",
     );
     formData.append("application_type", values.application_type || "");
     formData.append("passport_type", values.passport_type || "");
@@ -134,26 +138,28 @@ const ArchiveForm: React.FC<ArchiveFormProps> = ({
       "date_of_birth",
       values.date_of_birth
         ? dayjs(values.date_of_birth).format("YYYY-MM-DD")
-        : ""
+        : "",
     );
     formData.append("gender", values.gender || "");
     formData.append(
       "passport_registration_number",
-      values.passport_registration_number || ""
+      values.passport_registration_number || "",
     );
     formData.append(
       "issue_date",
-      values.issue_date ? dayjs(values.issue_date).format("YYYY-MM-DD") : ""
+      values.issue_date ? dayjs(values.issue_date).format("YYYY-MM-DD") : "",
     );
     formData.append(
       "expiration_date",
       values.expiration_date
         ? dayjs(values.expiration_date).format("YYYY-MM-DD")
-        : ""
+        : "",
     );
     formData.append("province", values.province || "");
     formData.append("district_city", values.district_city || "");
     formData.append("sub_district", values.sub_district || "");
+    formData.append("location", values.location || "");
+    formData.append("citizenship", values.citizenship || "");
 
     // ✅ file: create wajib; edit optional (kalau ada file baru, kirim)
     const fileList: UploadFile[] = values.file || [];
@@ -317,6 +323,17 @@ const ArchiveForm: React.FC<ArchiveFormProps> = ({
           rules={[{ required: true, message: "Kecamatan wajib diisi" }]}
         >
           <Input placeholder="Masukkan kecamatan" />
+        </Form.Item>
+
+        <Form.Item label="Lokasi" name="location">
+          <Input placeholder="Masukkan lokasi" />
+        </Form.Item>
+
+        <Form.Item label="Kewarganegaraan" name="citizenship">
+          <Select placeholder="Pilih kewarganegaraan">
+            <Select.Option value="WNI">WNI</Select.Option>
+            <Select.Option value="WNA">WNA</Select.Option>
+          </Select>
         </Form.Item>
 
         {/* ====== UPLOAD FILE ====== */}

@@ -1,6 +1,11 @@
 import { Button, Tooltip, Popconfirm, Tag, Space, Select } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { MdDelete, MdEdit } from "react-icons/md";
+import {
+  MdDelete,
+  MdEdit,
+  MdDescription,
+  MdInsertDriveFile,
+} from "react-icons/md";
 import type { BorrowingItem } from "../types/borrowing";
 
 type Props = {
@@ -9,6 +14,7 @@ type Props = {
   onDelete: (uuid: string) => void;
   onEdit: (uuid: string) => void;
   onStatusChange?: (uuid: string, status: string) => void;
+  showFileColumn?: boolean;
 };
 
 export const borrowingColumns = ({
@@ -17,13 +23,14 @@ export const borrowingColumns = ({
   onDelete,
   onEdit,
   onStatusChange,
+  showFileColumn = true,
 }: Props): ColumnsType<BorrowingItem> => {
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString("id-ID");
   };
 
-  return [
+  const baseColumns: ColumnsType<BorrowingItem> = [
     {
       key: "no",
       title: <span style={{ fontSize: 16, fontWeight: 600 }}>NO.</span>,
@@ -86,6 +93,68 @@ export const borrowingColumns = ({
         <span style={{ fontSize: 16 }}>{formatDate(text)}</span>
       ),
     },
+  ];
+
+  const fileColumn = {
+    title: <span style={{ fontSize: 16, fontWeight: 600 }}>File Arsip</span>,
+    key: "file",
+    align: "center",
+    render: (_: unknown, record: BorrowingItem) => {
+      const archiveRecord = record.archive as Record<string, unknown>;
+      const filePath = archiveRecord?.file_path as string | undefined;
+      const fileName = archiveRecord?.file as string | undefined;
+
+      if (!filePath) {
+        return <span style={{ fontSize: 16 }}>-</span>;
+      }
+
+      // Ekstrak nama file dari file_path jika file tidak ada
+      const displayName = fileName || filePath.split("/").pop() || "File";
+
+      // Tentukan icon berdasarkan tipe file
+      const getFileIcon = (name: string) => {
+        const ext = name.toLowerCase().split(".").pop();
+        if (ext === "pdf") {
+          return <MdDescription size={24} color="#FF4444" />;
+        }
+        return <MdInsertDriveFile size={24} color="#0066CC" />;
+      };
+
+      return (
+        <div
+          onClick={() => {
+            const link = document.createElement("a");
+            link.href = filePath;
+            link.download = displayName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }}
+          style={{
+            cursor: "pointer",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "8px",
+          }}
+          title={`Click to download: ${displayName}`}
+        >
+          {getFileIcon(displayName)}
+          <span
+            style={{ fontSize: 12, textAlign: "center", maxWidth: "100px" }}
+          >
+            {String(displayName).length > 20
+              ? String(displayName).substring(0, 17) + "..."
+              : displayName}
+          </span>
+        </div>
+      );
+    },
+  };
+
+  const columns: ColumnsType<BorrowingItem> = [
+    ...baseColumns,
+    ...(showFileColumn ? [fileColumn] : []),
     {
       title: <span style={{ fontSize: 16, fontWeight: 600 }}>STATUS</span>,
       key: "status",
@@ -100,18 +169,26 @@ export const borrowingColumns = ({
             style={{ width: 140 }}
             options={[
               {
-                label: "Dipinjam",
-                value: "dipinjam",
+                label: "menunggu di setujui",
+                value: "menunggu di setujui",
               },
               {
-                label: "Dikembalikan",
-                value: "dikembalikan",
+                label: "sudah disetujui",
+                value: "sudah disetujui",
+              },
+              {
+                label: "di tolak",
+                value: "di tolak",
               },
             ]}
           />
         ) : (
-          <Tag color={status === "dikembalikan" ? "green" : "red"}>
-            {status === "dikembalikan" ? "Dikembalikan" : "Dipinjam"}
+          <Tag color={status === "menunggu di setujui" ? "yellow" : "green"}>
+            {status === "menunggu di setujui"
+              ? "menunggu di setujui"
+              : status === "sudah disetujui"
+                ? "sudah disetujui"
+                : "di tolak"}
           </Tag>
         );
       },
@@ -157,4 +234,6 @@ export const borrowingColumns = ({
       ),
     },
   ];
+
+  return columns;
 };

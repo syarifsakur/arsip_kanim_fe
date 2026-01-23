@@ -6,11 +6,35 @@ export interface BorrowingItem {
   loan_date?: string;
   return_date?: string;
   status?: string;
+  created?: string;
+  updated?: string | null;
   createdAt: string;
   updatedAt: string;
   archive?: {
     uuid: string;
+    no_archive?: string | null;
     application_number: string;
-    full_name?: string;
+    application_date?: string | null;
+    application_type?: string | null;
+    passport_purpose?: string | null;
+    passport_number?: string | null;
+    passport_type?: string | null;
+    service_method?: string | null;
+    full_name?: string | null;
+    date_of_birth?: string | null;
+    gender?: string | null;
+    passport_registration_number?: string | null;
+    issue_date?: string | null;
+    expiration_date?: string | null;
+    province?: string | null;
+    district_city?: string | null;
+    sub_district?: string | null;
+    file?: string | null;
+    file_path?: string | null;
+    location?: string | null;
+    citizenship?: string | null;
+    application_status?: string | null;
+    createdAt?: string;
+    updatedAt?: string;
   };
 }

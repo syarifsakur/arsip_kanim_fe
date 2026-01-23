@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { Table, Button, Grid, Space, Input } from "antd";
+import { Table, Button, Grid, Input } from "antd";
 import type { TablePaginationConfig } from "antd/es/table";
 import { PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +18,7 @@ const { useBreakpoint } = Grid;
 const BorrowingDefault: React.FC = () => {
   const [borrowing, setBorrowing] = useState<BorrowingItem[]>([]);
   const [filteredBorrowing, setFilteredBorrowing] = useState<BorrowingItem[]>(
-    []
+    [],
   );
   const [query, setQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -40,13 +40,15 @@ const BorrowingDefault: React.FC = () => {
         response?.data?.data ?? response?.data?.response ?? [];
 
       const cleaned = list.filter(
-        (item) => item.borrowers_name !== "TOTAL DATA"
+        (item) => item.borrowers_name !== "TOTAL DATA",
       );
 
       setBorrowing(cleaned);
-      // tampilkan hanya yang status 'dipinjam'
       setFilteredBorrowing(
-        cleaned.filter((item) => (item.status || "dipinjam") === "dipinjam")
+        cleaned.filter(
+          (item) =>
+            (item.status || "menunggu di setujui") === "menunggu di setujui",
+        ),
       );
     } catch (error) {
       console.error("Error fetching borrowing:", error);
@@ -63,7 +65,7 @@ const BorrowingDefault: React.FC = () => {
   useEffect(() => {
     const nextSize = isMobile ? 5 : 10;
     setPagination((p) =>
-      p.pageSize === nextSize ? p : { ...p, pageSize: nextSize, current: 1 }
+      p.pageSize === nextSize ? p : { ...p, pageSize: nextSize, current: 1 },
     );
   }, [isMobile]);
 
@@ -72,14 +74,18 @@ const BorrowingDefault: React.FC = () => {
 
     if (!query) {
       setFilteredBorrowing(
-        borrowing.filter((item) => (item.status || "dipinjam") === "dipinjam")
+        borrowing.filter(
+          (item) =>
+            (item.status || "menunggu di setujui") === "menunggu di setujui",
+        ),
       );
       return;
     }
 
     const q = query.toLowerCase();
     const active = borrowing.filter(
-      (item) => (item.status || "dipinjam") === "dipinjam"
+      (item) =>
+        (item.status || "menunggu di setujui") === "menunggu di setujui",
     );
     setFilteredBorrowing(
       active.filter(
@@ -89,8 +95,8 @@ const BorrowingDefault: React.FC = () => {
             .includes(q) ||
           String(item.division || "")
             .toLowerCase()
-            .includes(q)
-      )
+            .includes(q),
+      ),
     );
   }, [query, borrowing]);
 
@@ -136,8 +142,8 @@ const BorrowingDefault: React.FC = () => {
   };
 
   const columns = borrowingColumns({
-    current: pagination.current,
-    pageSize: pagination.pageSize,
+    current: pagination.current || 1,
+    pageSize: pagination.pageSize || 10,
     onDelete: handleDelete,
     onEdit: handleEdit,
     onStatusChange: handleStatusChange,

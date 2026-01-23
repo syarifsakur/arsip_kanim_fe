@@ -96,13 +96,52 @@ export const archiveColumns = ({
             text?.toLowerCase().includes("baru")
               ? "green"
               : text
-              ? "gold"
-              : "default"
+                ? "gold"
+                : "default"
           }
           style={{ fontSize: 15 }}
         >
           {text || "-"}
         </Tag>
+      ),
+    },
+    {
+      title: <span style={{ fontSize: 16, fontWeight: 600 }}>Status</span>,
+      dataIndex: "application_status",
+      key: "application_status",
+      align: "center",
+      render: (text: string) => {
+        if (!text) return <span style={{ fontSize: 16 }}>-</span>;
+
+        const status = text.toLowerCase();
+        const isActive = status === "active" || status === "aktif";
+        const isInactive =
+          status === "inactive" ||
+          status === "tidak aktif" ||
+          status === "nonaktif";
+
+        return (
+          <Tag
+            color={isActive ? "success" : isInactive ? "error" : "default"}
+            style={{
+              fontSize: 15,
+              fontWeight: 500,
+              padding: "4px 12px",
+              borderRadius: "6px",
+            }}
+          >
+            {text}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: <span style={{ fontSize: 16, fontWeight: 600 }}>Lokasi</span>,
+      dataIndex: "location",
+      key: "location",
+      align: "center",
+      render: (text: string) => (
+        <span style={{ fontSize: 16 }}>{text || "-"}</span>
       ),
     },
     {

@@ -1,16 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AdminLayout } from "../../../layouts";
-import { Table, Grid, Space, Input, Button } from "antd";
+import { Table, Button, Grid, Input } from "antd";
 import type { TablePaginationConfig } from "antd/es/table";
+import { PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { borrowingColumns } from "../../../columns/borrowing.columns";
 import type { BorrowingItem } from "../../../types/borrowing";
-import { showNotificationError } from "../../../utils";
-import { fetchBorrowing, deleteBorrowing } from "../../../utils/apis";
+import { showNotification, showNotificationError } from "../../../utils";
+import { deleteBorrowing, getBorrowingUser } from "../../../utils/apis";
 
 const { useBreakpoint } = Grid;
 
-const Riwayat: React.FC = () => {
+const BorrowingPage: React.FC = () => {
   const [borrowing, setBorrowing] = useState<BorrowingItem[]>([]);
   const [filteredBorrowing, setFilteredBorrowing] = useState<BorrowingItem[]>(
     [],
@@ -29,28 +30,21 @@ const Riwayat: React.FC = () => {
   const loadBorrowing = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await fetchBorrowing();
+      const response = await getBorrowingUser();
+      console.log("Borrowing user response:", response);
+      const list: BorrowingItem[] = response?.data?.data ?? [];
 
-      const list: BorrowingItem[] =
-        response?.data?.data ?? response?.data?.response ?? [];
-
-      const cleaned = list.filter(
-        (item) => item.borrowers_name !== "TOTAL DATA",
+      // Filter hanya data dengan status "menunggu disetujui"
+      const filtered = list.filter(
+        (item) =>
+          (item.status || "menunggu disetujui") === "menunggu disetujui",
       );
 
-      setBorrowing(cleaned);
-
-      const returned = cleaned.filter(
-        (item) => (item.status || "") === "sudah disetujui" && (item.status || "") === "di tolak",
-      );
-
-      console.log("Cleaned data:", returned);
-      console.log("Total data:", cleaned.length);
-
-      setFilteredBorrowing(returned);
+      setBorrowing(filtered);
+      setFilteredBorrowing(filtered);
     } catch (error) {
       console.error("Error fetching borrowing:", error);
-      showNotificationError("Gagal mengambil data riwayat peminjaman!");
+      showNotificationError("Gagal mengambil data peminjaman!");
     } finally {
       setIsLoading(false);
     }
@@ -71,18 +65,13 @@ const Riwayat: React.FC = () => {
     setPagination((p) => ({ ...p, current: 1 }));
 
     if (!query) {
-      setFilteredBorrowing(
-        borrowing.filter((item) => (item.status || "") === "sudah disetujui" || (item.status || "") === "di tolak"),
-      );
+      setFilteredBorrowing(borrowing);
       return;
     }
 
     const q = query.toLowerCase();
-    const returned = borrowing.filter(
-      (item) => (item.status || "") === "sudah disetujui" || (item.status || "") === "di tolak",
-    );
     setFilteredBorrowing(
-      returned.filter(
+      borrowing.filter(
         (item) =>
           String(item.borrowers_name || "")
             .toLowerCase()
@@ -97,66 +86,70 @@ const Riwayat: React.FC = () => {
   const handleDelete = async (uuid: string) => {
     try {
       await deleteBorrowing(uuid);
-      await loadBorrowing();
+      showNotification("Data peminjaman berhasil dihapus!");
+      loadBorrowing();
     } catch (error) {
       console.error("Error deleting borrowing:", error);
-      showNotificationError("Gagal menghapus data riwayat peminjaman!");
+      showNotificationError("Gagal menghapus data peminjaman!");
     }
   };
 
+  const handleEdit = (uuid: string) => {
+    navigate(`/user/borrowing/edit/${uuid}`);
+  };
+
   const columns = borrowingColumns({
-    current: pagination.current!,
-    pageSize: pagination.pageSize!,
+    current: pagination.current || 1,
+    pageSize: pagination.pageSize || 10,
     onDelete: handleDelete,
-    onEdit: (uuid: string) => navigate(`/admin/borrowing/edit/${uuid}`),
-    // tidak ada perubahan status di riwayat, jadi tidak kirim onStatusChange
+    onEdit: handleEdit,
+    showFileColumn: false,
   });
 
   return (
     <AdminLayout>
-      <div style={{ padding: "8px 0" }}>
-        <Space
-          direction={isMobile ? "vertical" : "horizontal"}
-          className="w-full mb-4"
-          size={isMobile ? "small" : "middle"}
-          style={{ justifyContent: "space-between" }}
+      <div style={{ padding: "20px" }}>
+        <div
+          style={{
+            marginBottom: "20px",
+            display: "flex",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "10px",
+          }}
         >
-          <Input.Search
+          <Input
             placeholder="Cari nama peminjam atau divisi..."
-            allowClear
-            enterButton
             value={query}
-            onSearch={(v) => setQuery(String(v || ""))}
             onChange={(e) => setQuery(e.target.value)}
-            style={{ maxWidth: isMobile ? "100%" : 360 }}
+            style={{ maxWidth: "300px" }}
+            allowClear
           />
-
-          <Button type="default" onClick={loadBorrowing}>
-            Muat Ulang
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => navigate("/user/borrowing/create")}
+            size="large"
+          >
+            Tambah Peminjaman
           </Button>
-        </Space>
+        </div>
 
         <Table
           columns={columns}
           dataSource={filteredBorrowing}
           rowKey="uuid"
           loading={isLoading}
-          size={isMobile ? "small" : "middle"}
+          pagination={pagination}
+          onChange={(pag) =>
+            setPagination({ current: pag.current, pageSize: pag.pageSize })
+          }
           scroll={{ x: "max-content" }}
-          pagination={{
-            current: pagination.current!,
-            pageSize: pagination.pageSize!,
-            total: filteredBorrowing.length,
-            onChange: (page, pageSize) =>
-              setPagination((p) => ({ ...p, current: page, pageSize })),
-            showSizeChanger: false,
-            position: isMobile ? ["bottomCenter"] : ["bottomRight"],
-            responsive: true,
-          }}
+          style={{ fontSize: 14 }}
         />
       </div>
     </AdminLayout>
   );
 };
 
-export default Riwayat;
+export default BorrowingPage;
