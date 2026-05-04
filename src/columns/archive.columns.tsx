@@ -105,6 +105,7 @@ export const archiveColumns = ({
         </Tag>
       ),
     },
+
     {
       title: <span style={{ fontSize: 16, fontWeight: 600 }}>Status</span>,
       dataIndex: "application_status",

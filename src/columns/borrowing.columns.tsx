@@ -15,6 +15,7 @@ type Props = {
   onEdit: (uuid: string) => void;
   onStatusChange?: (uuid: string, status: string) => void;
   showFileColumn?: boolean;
+  hideEditButton?: boolean;
 };
 
 export const borrowingColumns = ({
@@ -24,6 +25,7 @@ export const borrowingColumns = ({
   onEdit,
   onStatusChange,
   showFileColumn = true,
+  hideEditButton = false,
 }: Props): ColumnsType<BorrowingItem> => {
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return "-";
@@ -199,18 +201,20 @@ export const borrowingColumns = ({
       align: "center",
       render: (_: BorrowingItem, record: BorrowingItem) => (
         <Space>
-          <Tooltip title="Edit">
-            <Button
-              type="primary"
-              icon={<MdEdit size={18} />}
-              onClick={() => onEdit(record.uuid)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            />
-          </Tooltip>
+          {!hideEditButton && (
+            <Tooltip title="Edit">
+              <Button
+                type="primary"
+                icon={<MdEdit size={18} />}
+                onClick={() => onEdit(record.uuid)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              />
+            </Tooltip>
+          )}
           <Popconfirm
             title="Hapus Data?"
             description="Apakah Anda yakin ingin menghapus data ini?"

@@ -10,6 +10,9 @@ export interface BorrowingItem {
   updated?: string | null;
   createdAt: string;
   updatedAt: string;
+  created_by?: string;
+  user_id?: string;
+  id_user?: string;
   archive?: {
     uuid: string;
     no_archive?: string | null;

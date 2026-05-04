@@ -168,6 +168,12 @@ const Riwayat: React.FC = () => {
       key: "file",
       align: "center",
       render: (_: unknown, record: BorrowingItem) => {
+        // Jangan tampilkan file jika status ditolak
+        const status = (record.status || "").toLowerCase();
+        if (status === "di tolak" || status === "ditolak") {
+          return <span style={{ fontSize: 16 }}>-</span>;
+        }
+
         const archiveRecord = record.archive as Record<string, unknown>;
         const filePath = archiveRecord?.file_path as string | undefined;
         const fileName = archiveRecord?.file as string | undefined;

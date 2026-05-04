@@ -8,7 +8,16 @@ import {
   LogoutOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Button, Layout, Menu, theme, Breadcrumb, Modal, Avatar } from "antd";
+import {
+  Button,
+  Layout,
+  Menu,
+  theme,
+  Breadcrumb,
+  Modal,
+  Avatar,
+  Grid,
+} from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   menuItems,
@@ -37,6 +46,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  const screens = Grid.useBreakpoint();
+  const isMobile = !screens.md;
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -126,10 +138,19 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         trigger={null}
         collapsible
         collapsed={collapsed}
+        breakpoint="md"
+        collapsedWidth={isMobile ? 0 : 70}
+        width={isMobile ? 180 : 220}
         style={{
           height: "100vh",
           overflow: "auto",
           backgroundColor: "#0a1a2f",
+          position: isMobile ? "fixed" : "static",
+          left: 0,
+          top: 0,
+          zIndex: isMobile ? 99 : "auto",
+          boxShadow:
+            isMobile && !collapsed ? "2px 0 8px rgba(0,0,0,0.15)" : "none",
         }}
       >
         {/* LOGO */}
@@ -154,12 +175,33 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             }}
           />
           {!collapsed && (
-            <div style={{ marginLeft: 12 }}>
-              <div style={{ fontWeight: 800, fontSize: 18, color: "#fff" }}>
-                Admin
+            <div
+              style={{
+                marginLeft: 16,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+              }}
+            >
+              <div
+                style={{
+                  fontWeight: 800,
+                  fontSize: 20,
+                  color: "#fff",
+                  lineHeight: 1.2,
+                }}
+              >
+                SI-DEI
               </div>
-              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.85)" }}>
-                Sistem Inventaris
+              <div
+                style={{
+                  fontSize: 8,
+                  color: "rgba(255,255,255,0.85)",
+                  lineHeight: 1.3,
+                  marginTop: 2,
+                }}
+              >
+                Sistem Informasi Data Elektronik Imigrasi
               </div>
             </div>
           )}
@@ -167,18 +209,32 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
         {/* MENU LIST */}
         <Menu
-          theme="dark" // <— tambahkan ini
+          theme="dark"
           mode="inline"
           selectedKeys={[selectedKey]}
           style={{
             backgroundColor: "#0a1a2f",
             borderRight: "none",
+            padding: "12px 0",
           }}
         >
-          {currentMenuItems.map((section: any) => (
+          {currentMenuItems.map((section: any, index: number) => (
             <React.Fragment key={section.title}>
               <Menu.ItemGroup
-                title={<span style={{ opacity: 0.9 }}>{section.title}</span>}
+                title={
+                  <span
+                    style={{
+                      opacity: 0.7,
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      letterSpacing: "0.5px",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.6)",
+                    }}
+                  >
+                    {section.title}
+                  </span>
+                }
               >
                 {section.items.map((item: any) => {
                   const active = selectedKey === item.key;
@@ -188,34 +244,59 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                       key={item.key}
                       onClick={() => handleMenuClick(item.path, item.key)}
                       icon={React.cloneElement(item.icon, {
-                        // theme="dark" sudah bikin icon putih,
-                        // tapi kalau mau paksa:
-                        style: { color: "#ffffff" },
+                        style: {
+                          color: active ? "#ffa940" : "rgba(255,255,255,0.85)",
+                          fontSize: "16px",
+                        },
                       })}
                       style={{
                         fontWeight: active ? 700 : 500,
-                        backgroundColor: active ? "#d87800" : "transparent",
+                        backgroundColor: active
+                          ? "rgba(255,164,64,0.15)"
+                          : "transparent",
+                        color: active ? "#ffa940" : "rgba(255,255,255,0.85)",
+                        borderRight: active ? "3px solid #ffa940" : "none",
+                        margin: "4px 8px",
+                        borderRadius: "6px 0 0 6px",
+                        transition: "all 0.3s ease, background-color 0.3s ease",
                       }}
                     >
-                      {item.label}
+                      <span style={{ marginLeft: "8px" }}>{item.label}</span>
                     </Menu.Item>
                   );
                 })}
               </Menu.ItemGroup>
+              {index < currentMenuItems.length - 1 && (
+                <div
+                  style={{
+                    borderTop: "1px solid rgba(255,255,255,0.1)",
+                    margin: "8px 16px",
+                  }}
+                />
+              )}
             </React.Fragment>
           ))}
 
           {/* LOGOUT */}
+          <div
+            style={{
+              borderTop: "1px solid rgba(255,255,255,0.1)",
+              margin: "12px 0",
+            }}
+          />
           <Menu.Item
             key="logout"
-            icon={<LogoutOutlined />}
+            icon={<LogoutOutlined style={{ fontSize: "16px" }} />}
             onClick={confirmLogout}
             style={{
               fontWeight: 600,
-              marginTop: 10,
+              margin: "8px 8px",
+              borderRadius: "6px",
+              color: "rgba(255,255,255,0.85)",
+              transition: "all 0.3s ease",
             }}
           >
-            Logout
+            <span style={{ marginLeft: "8px" }}>Logout</span>
           </Menu.Item>
         </Menu>
       </Sider>
@@ -224,7 +305,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       <Layout>
         <Header
           style={{
-            padding: "0 16px",
+            padding: "0 12px",
             background: "#ffffff",
             height: 64,
             display: "flex",
@@ -234,6 +315,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             position: "sticky",
             top: 0,
             zIndex: 10,
+            overflow: "hidden",
+            gap: "8px",
           }}
         >
           <Button
@@ -247,9 +330,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             }
             onClick={() => setCollapsed(!collapsed)}
             style={{
-              fontSize: 20,
-              width: 48,
-              height: 48,
+              fontSize: isMobile ? 16 : 18,
+              width: isMobile ? 36 : 44,
+              height: isMobile ? 36 : 44,
+              minWidth: isMobile ? 36 : 44,
+              padding: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
             }}
           />
 
@@ -258,16 +347,31 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 12,
-              fontSize: 12,
+              gap: isMobile ? 6 : 12,
+              fontSize: isMobile ? 10 : 12,
+              flexWrap: isMobile ? "wrap" : "nowrap",
+              justifyContent: "flex-end",
+              minWidth: 0,
+              overflow: "hidden",
             }}
           >
-            <span style={{ color: "#666" }}>
-              <strong>Role:</strong> {userProfile?.data?.role || "unknown"}
-            </span>
-            <span style={{ color: "#999" }}>|</span>
-            <span style={{ color: "#666" }}>
-              <strong>User:</strong>{" "}
+            {!isMobile && (
+              <>
+                <span style={{ color: "#666", whiteSpace: "nowrap" }}>
+                  <strong>Role:</strong> {userProfile?.data?.role || "unknown"}
+                </span>
+                <span style={{ color: "#999" }}>|</span>
+              </>
+            )}
+            <span
+              style={{
+                color: "#666",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              <strong>{isMobile ? "U:" : "User:"}</strong>{" "}
               {userProfile?.data?.name || userProfile?.data?.username || "N/A"}
             </span>
           </div>
@@ -277,11 +381,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           style={{
             height: "calc(100vh - 64px)",
             overflow: "auto",
-            margin: "24px 16px",
-            padding: 24,
-            // backgroundImage: `url(${kantor})`,
-            // backgroundSize: "cover",
-            // backgroundPosition: "center 10px",
+            margin: isMobile ? "12px" : "16px 20px",
+            padding: isMobile ? 12 : 16,
             borderRadius: borderRadiusLG,
             position: "relative",
           }}
@@ -290,14 +391,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <div
             style={{
               background: "rgba(255,255,255,0.92)",
-              padding: 20,
+              padding: isMobile ? 12 : 16,
               borderRadius: 12,
               minHeight: "calc(100% - 40px)",
               boxShadow: "0 6px 20px rgba(2,6,23,0.06)",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
             <Breadcrumb items={getBreadcrumbItems()} />
-            <div style={{ marginTop: 16 }}>{children}</div>
+            <div style={{ marginTop: 16, flex: 1, minHeight: 0 }}>
+              {children}
+            </div>
           </div>
         </Content>
         <Footer style={{ textAlign: "center", padding: "12px 16px" }}>

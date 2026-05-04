@@ -158,7 +158,12 @@ const ArchiveForm: React.FC<ArchiveFormProps> = ({
     formData.append("province", values.province || "");
     formData.append("district_city", values.district_city || "");
     formData.append("sub_district", values.sub_district || "");
-    formData.append("location", values.location || "");
+    formData.append(
+      "location",
+      // jika field location tidak ada dalam values (mis. form disembunyikan),
+      // gunakan nilai awal agar tidak mengosongkan lokasi di backend
+      values.location ?? initialValues?.location ?? "",
+    );
     formData.append("citizenship", values.citizenship || "");
 
     // ✅ file: create wajib; edit optional (kalau ada file baru, kirim)
@@ -325,14 +330,14 @@ const ArchiveForm: React.FC<ArchiveFormProps> = ({
           <Input placeholder="Masukkan kecamatan" />
         </Form.Item>
 
-        <Form.Item label="Lokasi" name="location">
+        {/* <Form.Item label="Lokasi" name="location">
           <Input placeholder="Masukkan lokasi" />
-        </Form.Item>
+        </Form.Item> */}
 
         <Form.Item label="Kewarganegaraan" name="citizenship">
           <Select placeholder="Pilih kewarganegaraan">
-            <Select.Option value="WNI">WNI</Select.Option>
-            <Select.Option value="WNA">WNA</Select.Option>
+            <Select.Option value="wni">WNI</Select.Option>
+            <Select.Option value="wna">WNA</Select.Option>
           </Select>
         </Form.Item>
 

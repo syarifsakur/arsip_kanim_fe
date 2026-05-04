@@ -40,7 +40,7 @@ const BorrowingCreate: React.FC = () => {
       await createBorrowing(data);
 
       showNotification("Berhasil menambahkan data peminjaman!");
-      navigate("/user/borrowing");
+      navigate("/user/borrowing", { replace: true });
     } catch (error) {
       console.error(error);
       const err = error as { response?: { data?: { msg?: string } } };

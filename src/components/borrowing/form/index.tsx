@@ -139,7 +139,7 @@ const BorrowingForm: React.FC<BorrowingFormProps> = ({
           <Input placeholder="Masukkan divisi" />
         </Form.Item>
 
-        <Form.Item
+        {/* <Form.Item
           label="Tanggal Peminjaman"
           name="loan_date"
           rules={[
@@ -162,7 +162,7 @@ const BorrowingForm: React.FC<BorrowingFormProps> = ({
             format="DD-MM-YYYY"
             placeholder="Pilih tanggal pengembalian"
           />
-        </Form.Item>
+        </Form.Item> */}
 
         <Space
           className="w-full"

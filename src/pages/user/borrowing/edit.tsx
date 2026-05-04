@@ -66,7 +66,7 @@ const BorrowingEdit: React.FC = () => {
     try {
       await updateBorrowing(uuid, data);
       showNotification("Berhasil memperbarui data peminjaman!");
-      navigate("/admin/borrowing");
+      navigate("/user/borrowing", { replace: true });
     } catch (error) {
       console.error(error);
       showNotificationError("Gagal memperbarui data peminjaman!");

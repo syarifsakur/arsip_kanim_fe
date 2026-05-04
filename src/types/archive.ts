@@ -14,6 +14,7 @@ export interface ArchiveItem {
   full_name: string | null; // nama lengkap
   date_of_birth: string | null; // tanggal lahir (YYYY-MM-DD) bisa null
   gender: "L" | "P" | null; // L/P (kadang null)
+  citizenship: string | null; // warga negara
 
   passport_registration_number: string | null; // nomor registrasi paspor
   issue_date: string | null; // tanggal terbit

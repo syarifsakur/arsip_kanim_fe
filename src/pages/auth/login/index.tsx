@@ -141,17 +141,23 @@ const Login: React.FC = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 12,
-              fontSize: 20,
-              fontWeight: 700,
+              gap: 16,
             }}
           >
             <img
               src={logo}
               alt="logo"
-              style={{ width: 55, height: 55, objectFit: "contain" }}
+              style={{ width: 60, height: 60, objectFit: "contain" }}
             />
-            Arsiparis Kanim kelas I TPI Palu
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                letterSpacing: "1px",
+              }}
+            >
+              SI-DEI
+            </div>
           </div>
         </div>
 

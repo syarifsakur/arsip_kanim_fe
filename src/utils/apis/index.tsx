@@ -77,8 +77,11 @@ export const updateArchive = (uuid: string, data: FormData) =>
     headers: { "Content-Type": "multipart/form-data" },
   });
 
-export const updateArchiveStatus = (uuid: string, status: string) =>
-  API_JWT.put(`/archive/update-status/${uuid}`, { application_status: status });
+export const updateArchiveStatus = (uuid: string, status: string) => {
+  return API_JWT.put(`/archive/update-status/${uuid}`, {
+    application_status: status,
+  });
+};
 
 //api barang
 export const fetchBarang = () => API_JWT.get("/barang");
